@@ -1,5 +1,6 @@
 import express from "express";
 import { handlerReadiness } from "./api/readiness.js";
+import { middlewareLogResponses } from "./middleware/middleware.js";
 
 const app = express();
 const PORT = 8080;
@@ -11,3 +12,5 @@ app.get("/healthz", handlerReadiness);
 app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
 });
+
+app.use(middlewareLogResponses);
