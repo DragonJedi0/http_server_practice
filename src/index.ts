@@ -19,6 +19,6 @@ app.listen(PORT, () => {
 // Register handlers
 app.get("/api/healthz", handlerReadiness);
 
-// Register middleware handlers
-app.get("/api/metrics", middlewarePrintMetrics);
-app.get("/api/reset", middlewareReset);
+// Register admin middleware handlers
+app.get("/admin/metrics", middlewarePrintMetrics);
+app.get("/admin/reset", middlewareReset);
