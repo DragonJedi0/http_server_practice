@@ -1,6 +1,7 @@
 import express from "express";
 import { handlerReadiness } from "./api/readiness.js";
 import { middlewareLogResponses, middlewareMetricsInc, middlewarePrintMetrics, middlewareReset } from "./api/middleware.js";
+import { handlerValidateChirp } from "./api/validate_chirp.js";
 
 // Create express app object
 const app = express();
@@ -18,7 +19,8 @@ app.listen(PORT, () => {
 
 // Register handlers
 app.get("/api/healthz", handlerReadiness);
+app.post("/api/validate_chirp", handlerValidateChirp);
 
 // Register admin middleware handlers
 app.get("/admin/metrics", middlewarePrintMetrics);
-app.get("/admin/reset", middlewareReset);
+app.post("/admin/reset", middlewareReset);
