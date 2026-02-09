@@ -9,6 +9,7 @@ const PORT = 8080;
 
 // Global log
 app.use(middlewareLogResponses);
+app.use(express.json());
 // Static app
 app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
