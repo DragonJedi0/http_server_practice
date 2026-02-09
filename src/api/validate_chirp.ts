@@ -34,9 +34,10 @@ export async function handlerValidateChirp(req: Request, res: Response) {
 
     // Check if length is greater than 140
     if(params.body.length > 140){
-        const error = JSON.stringify({ "error": "Chirp is too long" });
-        res.status(400).send(error);
-        return;
+        // const error = JSON.stringify({ "error": "Chirp is too long" });
+        // res.status(400).send(error);
+        // return;
+        throw new Error("Chirp is too long");
     }
 
     // Check if body has restricted words
