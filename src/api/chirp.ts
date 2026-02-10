@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BadRequestError } from "./errors.js";
-import { Post } from "../lib/db/schema.js";
-import { createPost } from "../lib/db/queries/posts.js";
+import { Chirp } from "../lib/db/schema.js";
+import { createChirp } from "../lib/db/queries/chips.js";
 
 export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
@@ -43,12 +43,12 @@ export async function handlerPostChirp(req: Request, res: Response) {
             cleanedBody = cleanedList.join(" ");
         }
 
-    const post: Post = {
+    const post: Chirp = {
         body: cleanedBody,
         userId: params.userId,
     }
 
-    const result = await createPost(post);
+    const result = await createChirp(post);
     
     res.status(201).send({
         "id": result.id,

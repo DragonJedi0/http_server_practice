@@ -12,7 +12,7 @@ export const users = pgTable("users", {
 
 export type NewUser = typeof users.$inferInsert;
 
-export const posts = pgTable("posts", {
+export const chirps = pgTable("chirps", {
   id: uuid("id").primaryKey().defaultRandom(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at")
@@ -27,4 +27,4 @@ export const posts = pgTable("posts", {
       }).notNull(),
 });
 
-export type Post = typeof posts.$inferInsert;
+export type Chirp = typeof chirps.$inferInsert;

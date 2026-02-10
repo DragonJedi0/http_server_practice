@@ -15,6 +15,13 @@
       "when": 1770764526436,
       "tag": "0001_hard_lockheed",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770765273640,
+      "tag": "0002_handy_christian_walker",
+      "breakpoints": true
     }
   ]
 }
