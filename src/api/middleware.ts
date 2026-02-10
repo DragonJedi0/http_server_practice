@@ -15,20 +15,20 @@ export async function middlewareLogResponses(req: Request, res: Response, next: 
 // Log server hits
 export async function middlewareMetricsInc(req: Request, res: Response, next: NextFunction) {
     res.on("finish", () => {
-        config.fileServerHits += 1;
+        config.api.fileServerHits += 1;
     });
     next();
 }
 
 // Print server hits
 export async function middlewarePrintMetrics(req: Request, res: Response, next: NextFunction) {
-    console.log(`Hits: ${config.fileServerHits}`);
+    console.log(`Hits: ${config.api.fileServerHits}`);
     res.set("Content-Type", "text/html; charset=utf-8");
-    res.send(`<h1>Welcome, Chirpy Admin</h1><p>Chirpy has been visited ${config.fileServerHits} times!</p>`);
+    res.send(`<h1>Welcome, Chirpy Admin</h1><p>Chirpy has been visited ${config.api.fileServerHits} times!</p>`);
 }
 
 // Reset server hits
 export async function middlewareReset(req: Request, res: Response, next: NextFunction) {
-    config.fileServerHits = 0;
+    config.api.fileServerHits = 0;
     res.send("Hits reset to 0");
 }
