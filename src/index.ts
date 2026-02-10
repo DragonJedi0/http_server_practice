@@ -3,10 +3,13 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import express from "express";
 import { handlerReadiness } from "./api/readiness.js";
-import { middlewareLogResponses, middlewareMetricsInc, middlewarePrintMetrics, middlewareReset } from "./api/middleware.js";
-import { handlerValidateChirp } from "./api/validate_chirp.js";
+import { middlewareLogResponses, middlewareMetricsInc } from "./api/middleware.js";
+import { handlerPostChirp } from "./api/chirp.js";
 import { errorHandler } from "./api/errors.js";
 import { config } from "./config.js";
+import { middlewareReset } from "./api/reset.js";
+import { middlewarePrintMetrics } from "./api/metrics.js";
+import { handlerCreateUser } from "./api/users.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -22,9 +25,12 @@ app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
 // Register handlers
 app.get("/api/healthz", handlerReadiness);
-app.post("/api/validate_chirp", (req, res, next) => {
-    Promise.resolve(handlerValidateChirp(req, res)).catch(next);
+app.post("/api/chirps", (req, res, next) => {
+    Promise.resolve(handlerPostChirp(req, res)).catch(next);
 });
+app.post("/api/users", (req, res, next) => {
+    Promise.resolve(handlerCreateUser(req, res)).catch(next);
+})
 
 // Register admin middleware handlers
 app.get("/admin/metrics", middlewarePrintMetrics);

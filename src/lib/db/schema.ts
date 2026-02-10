@@ -11,3 +11,20 @@ export const users = pgTable("users", {
 });
 
 export type NewUser = typeof users.$inferInsert;
+
+export const posts = pgTable("posts", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+  body: varchar("body", { length: 140 }).notNull(),
+  userId: uuid("user_id")
+    .references(() => users.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }).notNull(),
+});
+
+export type Post = typeof posts.$inferInsert;

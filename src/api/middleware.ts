@@ -19,16 +19,3 @@ export async function middlewareMetricsInc(req: Request, res: Response, next: Ne
     });
     next();
 }
-
-// Print server hits
-export async function middlewarePrintMetrics(req: Request, res: Response, next: NextFunction) {
-    console.log(`Hits: ${config.api.fileServerHits}`);
-    res.set("Content-Type", "text/html; charset=utf-8");
-    res.send(`<h1>Welcome, Chirpy Admin</h1><p>Chirpy has been visited ${config.api.fileServerHits} times!</p>`);
-}
-
-// Reset server hits
-export async function middlewareReset(req: Request, res: Response, next: NextFunction) {
-    config.api.fileServerHits = 0;
-    res.send("Hits reset to 0");
-}

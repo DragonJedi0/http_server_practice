@@ -8,6 +8,13 @@
       "when": 1770744037427,
       "tag": "0000_married_nick_fury",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770764526436,
+      "tag": "0001_hard_lockheed",
+      "breakpoints": true
     }
   ]
 }

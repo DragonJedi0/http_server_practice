@@ -1,9 +1,12 @@
 import { Request, Response } from "express";
 import { BadRequestError } from "./errors.js";
+import { Post } from "../lib/db/schema.js";
+import { createPost } from "../lib/db/queries/posts.js";
 
-export async function handlerValidateChirp(req: Request, res: Response) {
+export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
         body: string,
+        userId: string,
     };
 
     // req.body is automatically parsed via app.use(express.json())
@@ -40,6 +43,18 @@ export async function handlerValidateChirp(req: Request, res: Response) {
             cleanedBody = cleanedList.join(" ");
         }
 
-    const valid = JSON.stringify({ "cleanedBody": cleanedBody });
-    res.status(200).send(valid);
+    const post: Post = {
+        body: cleanedBody,
+        userId: params.userId,
+    }
+
+    const result = await createPost(post);
+    
+    res.status(201).send({
+        "id": result.id,
+        "createdAt": result.createdAt,
+        "updatedAt": result.updatedAt,
+        "body": result.body,
+        "userId": result.userId,
+    });
 }
