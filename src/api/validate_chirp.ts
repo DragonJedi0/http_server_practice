@@ -1,30 +1,7 @@
 import { Request, Response } from "express";
+import { BadRequestError } from "./errors.js";
 
 export async function handlerValidateChirp(req: Request, res: Response) {
-    // let body = ""; // Initialize
-
-    // // Listen for data events
-    // req.on("data", (chunk) => {
-    //     body += chunk;
-    // });
-
-    // // Listen for events
-    // req.on("end", () => {
-    //     try{
-    //         res.header("Content-Type", "application/json");
-    //         const parsedBody = JSON.parse(body);
-    //         if(parsedBody.body.length >= 140){
-    //             const error = JSON.stringify({ "error": "Chirp is too long" });
-    //             res.status(400).send(error);
-    //         } else {
-    //             const valid = JSON.stringify({ "valid": true });
-    //             res.status(200).send(valid);
-    //         }
-    //     } catch (error) {
-    //         res.status(400).send("Invalid JSON");
-    //     }
-    // });
-
     type parameters = {
         body: string,
     };
@@ -34,10 +11,7 @@ export async function handlerValidateChirp(req: Request, res: Response) {
 
     // Check if length is greater than 140
     if(params.body.length > 140){
-        // const error = JSON.stringify({ "error": "Chirp is too long" });
-        // res.status(400).send(error);
-        // return;
-        throw new Error("Chirp is too long");
+        throw new BadRequestError("Chirp is too long. Max length is 140");
     }
 
     // Check if body has restricted words
