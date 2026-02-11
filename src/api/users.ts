@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { BadRequestError } from "../api/errors.js";
 import { createUser } from "../lib/db/queries/users.js";
-import { NewUser } from "../lib/db/schema.js";
+import { respondWithJSON } from "./json.js";
 
 export async function handlerCreateUser(req: Request, res: Response) {
     type parameters = {
@@ -11,21 +11,15 @@ export async function handlerCreateUser(req: Request, res: Response) {
     // req.body is automatically parsed via app.use(express.json())
     const params: parameters = req.body;
 
-    //validate email syntax
-    if(!params.email.includes("@")){
+    if(!params.email){
         throw new BadRequestError("Invaild email");
     }
+    // TODO: validate email syntax
 
-    const user: NewUser = {
-        email: params.email
-    };
+    const user = await createUser({ email: params.email });
+    if(!user){
+        throw new Error("Could not create user");
+    }
 
-    const result = await createUser(user);
-
-    res.status(201).send({
-        "id": result.id,
-        "createdAt": result.createdAt,
-        "updatedAt": result.updatedAt,
-        "email": result.email
-    });
+    respondWithJSON(res, 201, user);
 }
