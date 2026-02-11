@@ -5,8 +5,8 @@ import { respondWithJSON } from "./json.js";
 
 export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
-        body: string,
-        userId: string,
+        body: string;
+        userId: string;
     };
 
     // req.body is automatically parsed via app.use(express.json())

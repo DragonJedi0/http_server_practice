@@ -9,7 +9,7 @@ import { errorHandler } from "./api/errors.js";
 import { config } from "./config.js";
 import { middlewareReset } from "./api/reset.js";
 import { middlewarePrintMetrics } from "./api/metrics.js";
-import { handlerCreateUser } from "./api/users.js";
+import { handlerCreateUser, handlerLogIn } from "./api/users.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -26,6 +26,9 @@ app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 
 // Register handlers
 app.get("/api/healthz", handlerReadiness);
+app.post("/api/login", (req, res, next) => {
+    Promise.resolve(handlerLogIn(req, res)).catch(next);
+});
 
   // Chirps handlers
 app.post("/api/chirps", (req, res, next) => {
@@ -41,7 +44,7 @@ app.get("/api/chirps/:chirpId", (req, res, next) => {
   // User handlers
 app.post("/api/users", (req, res, next) => {
     Promise.resolve(handlerCreateUser(req, res)).catch(next);
-})
+});
 
 
 // Register admin middleware handlers
