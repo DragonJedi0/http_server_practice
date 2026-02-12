@@ -51,12 +51,10 @@ describe("JWT Functions", () => {
     const userID = "some-unique-user-id";
     let validToken: string;
     let expiredToken: string;
-    let futureToken: string;
 
     beforeAll(() => {
         validToken = makeJWT(userID, 3600, secret);
         expiredToken = makeJWT(userID, -3600, secret);
-        futureToken = makeJWT(userID, 7200, secret);
     });
 
     it("should validate a valid token", () => {
