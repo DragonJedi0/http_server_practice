@@ -52,7 +52,7 @@ export async function handlerLogIn(req: Request, res: Response) {
     const user = await getUserByEmail(params.email);
 
     // if user not found or checkPasswordHash returns false
-    if(!user || !await checkPasswordHash(user.hashedPassword, params.password)){
+    if(!user || !await checkPasswordHash(params.password, user.hashedPassword)){
         throw new UnauthorizedError("Incorrect email or password");
     }
 
