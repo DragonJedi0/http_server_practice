@@ -14,9 +14,9 @@ export async function handlerPostChirp(req: Request, res: Response) {
     const params: parameters = req.body;
     // Get token from body
     // Remember that 'authorization' header always start with 'Bearer'
-    const token = getBearerToken(req).slice(7);
+    const token = getBearerToken(req);
     // Get userID from JWT
-    const userID = validateJWT(token, config.secret);
+    const userID = validateJWT(token, config.jwt.secret);
 
     // createChirp returns new object added to database
     // validateChirp ensures that the post follows guidelines

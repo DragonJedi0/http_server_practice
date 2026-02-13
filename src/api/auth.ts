@@ -49,9 +49,17 @@ export function validateJWT(tokenString: string, secret: string): string{
 } 
 
 export function getBearerToken(req: Request): string{
-    const token = req.get('authorization');
-    if(!token){
-        throw new BadRequestError("Missing headers");
+    const authHeader = req.get("Authorization");
+    if(!authHeader){
+        throw new BadRequestError("Malformed authorization header");
     }
-    return token;
+    return extractBearerToken(authHeader);
+}
+
+function extractBearerToken(header: string): string{
+    const splitAuth = header.split(" ");
+    if(splitAuth.length > 2 || splitAuth[0] !== "Bearer"){
+        throw new BadRequestError("Malformed authorization header");
+    }
+    return splitAuth[1];
 }

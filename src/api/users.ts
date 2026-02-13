@@ -7,7 +7,8 @@ import { NewUser } from "../lib/db/schema.js";
 import { config } from "../config.js";
 
 // Create a response type to prevent hashedPassword from being transmitted
-type UserResponse = Omit<NewUser, "hashedPassword"> & {
+type UserResponse = Omit<NewUser, "hashedPassword">;
+type LoginResponse = UserResponse & {
     token?: string;
 };
 
@@ -61,11 +62,13 @@ export async function handlerLogIn(req: Request, res: Response) {
     }
 
     // Create token based on client expiration time
-    const expires = isValidExpiration(params.expiresInSeconds) ? params.expiresInSeconds : 3600;
+    let timer = config.jwt.defaultDuration;
+    if(params.expiresInSeconds && (params.expiresInSeconds >= 0) && !(params.expiresInSeconds > config.jwt.defaultDuration)){
+        timer = params.expiresInSeconds;
+    }
+    const token = makeJWT(user.id, timer, config.jwt.secret);
 
-    const token = makeJWT(user.id, expires, config.secret);
-
-    const securedUser: UserResponse = {
+    const securedUser: LoginResponse = {
         id: user.id,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
@@ -74,11 +77,4 @@ export async function handlerLogIn(req: Request, res: Response) {
     }
     console.log(`User with email ${securedUser.email} successfully logged in`);
     respondWithJSON(res, 200, securedUser);
-}
-
-function isValidExpiration(value: unknown): value is number{
-    return typeof value === "number" &&
-            Number.isFinite(value) &&
-            value >= 0 &&
-            value <= 3600;
 }
