@@ -1,12 +1,15 @@
-import { Request, Response } from "express";
+import e, { Request, Response } from "express";
 import { BadRequestError, UnauthorizedError } from "../api/errors.js";
 import { createUser, getUserByEmail } from "../lib/db/queries/users.js";
 import { respondWithJSON } from "./json.js";
-import { checkPasswordHash, hashPassword } from "./auth.js";
-import { NewUser } from "src/lib/db/schema.js";
+import { checkPasswordHash, hashPassword, makeJWT } from "./auth.js";
+import { NewUser } from "../lib/db/schema.js";
+import { config } from "../config.js";
 
 // Create a response type to prevent hashedPassword from being transmitted
-type UserResponse = Omit<NewUser, "hashedPassword">;
+type UserResponse = Omit<NewUser, "hashedPassword"> & {
+    token?: string;
+};
 
 export async function handlerCreateUser(req: Request, res: Response) {
     type parameters = {
@@ -44,6 +47,7 @@ export async function handlerLogIn(req: Request, res: Response) {
     type parameters = {
         email: string;
         password: string;
+        expiresInSeconds?: number;
     };
     // req.body is automatically parsed via app.use(express.json())
     const params: parameters = req.body;
@@ -56,12 +60,25 @@ export async function handlerLogIn(req: Request, res: Response) {
         throw new UnauthorizedError("Incorrect email or password");
     }
 
+    // Create token based on client expiration time
+    const expires = isValidExpiration(params.expiresInSeconds) ? params.expiresInSeconds : 3600;
+
+    const token = makeJWT(user.id, expires, config.secret);
+
     const securedUser: UserResponse = {
         id: user.id,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        email: user.email
+        email: user.email,
+        token: token
     }
     console.log(`User with email ${securedUser.email} successfully logged in`);
     respondWithJSON(res, 200, securedUser);
+}
+
+function isValidExpiration(value: unknown): value is number{
+    return typeof value === "number" &&
+            Number.isFinite(value) &&
+            value >= 0 &&
+            value <= 3600;
 }

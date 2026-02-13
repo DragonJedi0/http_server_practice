@@ -1,7 +1,8 @@
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import type { JwtPayload } from "jsonwebtoken";
-import { UnauthorizedError } from "./errors.js";
+import { BadRequestError, UnauthorizedError } from "./errors.js";
+import { Request } from "express";
 
 export async function hashPassword(password: string): Promise<string>{
     return await argon2.hash(password);
@@ -46,3 +47,11 @@ export function validateJWT(tokenString: string, secret: string): string{
         throw new UnauthorizedError("Invalid token");
     }
 } 
+
+export function getBearerToken(req: Request): string{
+    const token = req.get('authorization');
+    if(!token){
+        throw new BadRequestError("Missing headers");
+    }
+    return token;
+}

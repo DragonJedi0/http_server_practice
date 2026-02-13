@@ -2,29 +2,35 @@ import { Request, Response } from "express";
 import { BadRequestError, NotFoundError } from "./errors.js";
 import { createChirp, getAllChirps, getChirpById } from "../lib/db/queries/chirps.js";
 import { respondWithJSON } from "./json.js";
+import { getBearerToken, validateJWT } from "./auth.js";
+import { config } from "../config.js";
 
 export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
         body: string;
-        userId: string;
     };
 
     // req.body is automatically parsed via app.use(express.json())
     const params: parameters = req.body;
+    // Get token from body
+    // Remember that 'authorization' header always start with 'Bearer'
+    const token = getBearerToken(req).slice(7);
+    // Get userID from JWT
+    const userID = validateJWT(token, config.secret);
 
     // createChirp returns new object added to database
     // validateChirp ensures that the post follows guidelines
     // Passing inline Chirp object rather than creating an object variable
     const chirp = await createChirp({
         body: validateChirp(params.body),
-        userId: params.userId,
+        userId: userID,
     });
 
     // Throw Error if undefined
     if(!chirp){
         throw new Error("Could not create chirp");
     }
-    
+    console.log(`Post succecfully added for user ${userID}`);
     respondWithJSON(res, 201, chirp);
 }
 

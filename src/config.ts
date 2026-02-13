@@ -14,6 +14,7 @@ type APIConfig = {
 type Config = {
     api: APIConfig;
     db: DBConfig;
+    secret: string;
 }
 
 process.loadEnvFile();
@@ -31,7 +32,8 @@ export const config: Config = {
     db: {
         migrationConfig: migrationConfig,
         url: envOrThrow("DB_URL"),
-    }
+    },
+    secret: envOrThrow("SECRET")
 }
 
 function envOrThrow(key: string) {

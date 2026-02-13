@@ -1,7 +1,8 @@
-import { beforeAll, describe, expect, it } from "vitest";
-import { checkPasswordHash, hashPassword, makeJWT, validateJWT } from "../auth.js";
-import { UnauthorizedError } from "../errors.js";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { checkPasswordHash, getBearerToken, hashPassword, makeJWT, validateJWT } from "../auth.js";
+import { BadRequestError, UnauthorizedError } from "../errors.js";
 import jwt from "jsonwebtoken";
+import { Request } from "express";
 
 describe("Password Hashing", () => {
     const password1 = "correctPassword123!";
@@ -75,5 +76,59 @@ describe("JWT Functions", () => {
     it("should throw an error for expired tokens", () => {
         expect(() => { validateJWT(expiredToken, secret) })
             .toThrow(jwt.TokenExpiredError);
+    });
+});
+
+describe("Token Functions", () => {
+
+    const req: Partial<Request> = {
+        headers:{
+            authorization: "Bearer my-secret-token",
+        },
+        get: function(name:string){
+            return (this.headers as Record<string, any>)[name.toLowerCase()];
+        }
+    }
+    const req2: Partial<Request> = {
+        headers:{
+            authorization: "Bearer my-other-secret-token",
+        },
+        get: function(name:string){
+            return (this.headers as Record<string, any>)[name.toLowerCase()];
+        }
+    }
+    const badReq: Partial<Request> = {
+        headers:{
+            authorization: undefined,
+        },
+        get: function(name:string){
+            return (this.headers as Record<string, any>)[name.toLowerCase()];
+        }
+    }
+    const badReq2: Partial<Request> = {
+        headers:{},
+        get: function(name:string){
+            return (this.headers as Record<string, any>)[name.toLowerCase()];
+        }
+    }
+    
+    it("should validate a valid token", () => {
+        const result = getBearerToken(req as Request);
+        expect(result).toBe("Bearer my-secret-token");
+    });
+    
+    it("should validate a valid token", () => {
+        const result = getBearerToken(req2 as Request);
+        expect(result).toBe("Bearer my-other-secret-token");
+    });
+    
+    it("should throw an error for missing headers", () => {
+        expect(() => { getBearerToken(badReq as Request) })
+            .toThrow(BadRequestError);
+    });
+    
+    it("should throw an error for missing headers", () => {
+        expect(() => { getBearerToken(badReq2 as Request) })
+            .toThrow(BadRequestError);
     });
 });
