@@ -69,7 +69,7 @@ export function extractBearerToken(header: string): string{
 export function makeRefreshToken(){
     const buff = crypto.randomBytes(32);
     const hex = buff.toString('hex');
-    const expiresInDays = new Date(Date.now() + ((config.jwt.defaultDuration * 24) * 60) * 1000); // Date.now() + (((1 hour * 24) * 60 days) * 1000 milliseconds)
+    const expiresInDays = new Date(Date.now() + ((3600 * 24) * 60) * 1000); // Date.now() + (((1 hour in seconds * 24) * 60 days) * 1000 milliseconds)
 
     return {
         token: hex,
