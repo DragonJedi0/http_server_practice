@@ -17,6 +17,7 @@ export async function middlewareReset(req: Request, res: Response, next: NextFun
         "Hits reset to 0",
         "Users table cleared",
         "Posts table cleared",
+        "Refresh Tokens table cleared"
     ];
 
     for (const result of results){

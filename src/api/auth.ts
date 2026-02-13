@@ -1,8 +1,10 @@
 import argon2 from "argon2";
 import jwt from "jsonwebtoken";
+import crypto from "node:crypto";
 import type { JwtPayload } from "jsonwebtoken";
 import { BadRequestError, UnauthorizedError } from "./errors.js";
 import { Request } from "express";
+import { config } from "../config.js";
 
 export async function hashPassword(password: string): Promise<string>{
     return await argon2.hash(password);
@@ -21,7 +23,7 @@ type payload = Pick<JwtPayload, "iss" | "sub" | "iat" | "exp">;
 
 export function makeJWT(userID: string, expiresIn: number, secret: string): string{
     const payload: payload = {
-        iss: "chirpy",
+        iss: config.jwt.issuer,
         sub: userID,
         iat: Math.floor(Date.now()/1000),
         exp: Math.floor(Date.now()/1000) + expiresIn,
@@ -56,10 +58,21 @@ export function getBearerToken(req: Request): string{
     return extractBearerToken(authHeader);
 }
 
-function extractBearerToken(header: string): string{
+export function extractBearerToken(header: string): string{
     const splitAuth = header.split(" ");
-    if(splitAuth.length > 2 || splitAuth[0] !== "Bearer"){
+    if(splitAuth.length < 2 || splitAuth.length > 2 || splitAuth[0] !== "Bearer"){
         throw new BadRequestError("Malformed authorization header");
     }
     return splitAuth[1];
+}
+
+export function makeRefreshToken(){
+    const buff = crypto.randomBytes(32);
+    const hex = buff.toString('hex');
+    const expiresInDays = new Date(Date.now() + ((config.jwt.defaultDuration * 24) * 60) * 1000); // Date.now() + (((1 hour * 24) * 60 days) * 1000 milliseconds)
+
+    return {
+        token: hex,
+        expiration: expiresInDays
+    }
 }

@@ -10,6 +10,7 @@ import { config } from "./config.js";
 import { middlewareReset } from "./api/reset.js";
 import { middlewarePrintMetrics } from "./api/metrics.js";
 import { handlerCreateUser, handlerLogIn } from "./api/users.js";
+import { handlerRefreshToken, handlerRevokeToken } from "./api/token.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
 await migrate(drizzle(migrationClient), config.db.migrationConfig);
@@ -28,6 +29,12 @@ app.use("/app", middlewareMetricsInc, express.static("./src/app"));
 app.get("/api/healthz", handlerReadiness);
 app.post("/api/login", (req, res, next) => {
     Promise.resolve(handlerLogIn(req, res)).catch(next);
+});
+app.post("/api/refresh", (req, res, next) =>{
+    Promise.resolve(handlerRefreshToken(req, res)).catch(next);
+});
+app.post("/api/revoke", (req, res, next) => {
+    Promise.resolve(handlerRevokeToken(req, res)).catch(next);
 });
 
   // Chirps handlers
