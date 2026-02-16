@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { BadRequestError, NotFoundError } from "./errors.js";
-import { createChirp, getAllChirps, getChirpById } from "../lib/db/queries/chirps.js";
+import { BadRequestError, ForbiddenError, NotFoundError } from "./errors.js";
+import { createChirp, deleteChripByID, getAllChirps, getChirpById } from "../lib/db/queries/chirps.js";
 import { respondWithJSON } from "./json.js";
 import { getBearerToken, validateJWT } from "./auth.js";
 import { config } from "../config.js";
+import { getUserFromRefreshToken } from "../lib/db/queries/refreshTokens.js";
 
 export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
@@ -12,7 +13,7 @@ export async function handlerPostChirp(req: Request, res: Response) {
 
     // req.body is automatically parsed via app.use(express.json())
     const params: parameters = req.body;
-    // Get token from body
+    // Get token from header
     // Remember that 'authorization' header always start with 'Bearer'
     const token = getBearerToken(req);
     // Get userID from JWT
@@ -62,12 +63,12 @@ export async function handlerGetAllChirps(req: Request, res: Response) {
 }
 
 export async function handlerGetChirpByID(req: Request, res: Response) {
-    // 1. Define the shape of the data coming from the URL
+    // Define the shape of the data coming from the URL
     type PathParams = {
         chirpId: string;
     };
 
-    // 2. Identify the source (req.params for URL, req.body for JSON)
+    // Identify the source (req.params for URL, req.body for JSON)
     const params = req.params as PathParams;
     const chirpId = params.chirpId;
 
@@ -77,4 +78,32 @@ export async function handlerGetChirpByID(req: Request, res: Response) {
     }
 
     respondWithJSON(res, 200, chirp);
+}
+
+export async function handlerDeleteChirp(req: Request, res: Response) {
+    // Get token from header
+    const token = getBearerToken(req);
+    //Get userID from JWT
+    const userID = validateJWT(token, config.jwt.secret);
+
+    // Define the shape of the data coming from the URL
+    type PathParams = {
+        chirpId: string;
+    };
+
+    // Identify the source (req.params for URL, req.body for JSON)
+    const params = req.params as PathParams;
+
+    const chirp = await getChirpById(params.chirpId);
+
+    if(chirp.userId != userID){
+        throw new ForbiddenError("403 Forbidden");
+    }
+    
+    try {
+        await deleteChripByID(chirp.id);
+        res.status(204).send();
+    } catch {
+        throw new NotFoundError("404 not found");
+    }
 }

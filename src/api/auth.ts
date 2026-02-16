@@ -2,7 +2,7 @@ import argon2 from "argon2";
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
 import type { JwtPayload } from "jsonwebtoken";
-import { BadRequestError, UnauthorizedError } from "./errors.js";
+import { BadRequestError, ForbiddenError, UnauthorizedError } from "./errors.js";
 import { Request } from "express";
 import { config } from "../config.js";
 
