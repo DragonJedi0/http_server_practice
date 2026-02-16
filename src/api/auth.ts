@@ -54,7 +54,7 @@ export function getBearerToken(req: Request): string{
     const authHeader = req.get("Authorization");
     if(!authHeader){
         console.log("Authorization header not found");
-        throw new UnauthorizedError("401 Not Authorized");
+        throw new UnauthorizedError("Not Authorized");
     }
     return extractBearerToken(authHeader);
 }
@@ -71,10 +71,29 @@ export function extractBearerToken(header: string): string{
 export function makeRefreshToken(){
     const buff = crypto.randomBytes(32);
     const hex = buff.toString('hex');
-    const expiresInDays = new Date(Date.now() + ((3600 * 24) * 60) * 1000); // Date.now() + (((1 hour in seconds * 24) * 60 days) * 1000 milliseconds)
+    const expiresInDays = new Date(Date.now() + config.jwt.resetDuration);
 
     return {
         token: hex,
         expiration: expiresInDays
     }
+}
+
+export function getAPIKey(req: Request): string {
+    const authHeader = req.get("Authorization");
+    if(!authHeader){
+        console.log("Authorization header not found");
+        throw new UnauthorizedError("Not Authorized");
+    }
+
+    return extractAPIKey(authHeader);
+}
+
+export function extractAPIKey(header: string): string {
+    const splitAuth = header.split(" ");
+    if(splitAuth.length < 2 || splitAuth.length > 2 || splitAuth[0] !== "ApiKey"){
+        console.log("Authorization header malformed");
+        throw new BadRequestError("Malformed authorization header");
+    }
+    return splitAuth[1];
 }

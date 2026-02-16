@@ -10,7 +10,7 @@ export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
         body: string;
     };
-
+ 
     // req.body is automatically parsed via app.use(express.json())
     const params: parameters = req.body;
     // Get token from header
@@ -97,13 +97,13 @@ export async function handlerDeleteChirp(req: Request, res: Response) {
     const chirp = await getChirpById(params.chirpId);
 
     if(chirp.userId != userID){
-        throw new ForbiddenError("403 Forbidden");
+        throw new ForbiddenError("Forbidden");
     }
     
     try {
         await deleteChripByID(chirp.id);
         res.status(204).send();
     } catch {
-        throw new NotFoundError("404 not found");
+        throw new NotFoundError("not found");
     }
 }

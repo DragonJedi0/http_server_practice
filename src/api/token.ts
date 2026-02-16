@@ -38,14 +38,14 @@ export async function handlerRevokeToken(req: Request, res: Response) {
     const user = await getUserFromRefreshToken(authToken);
     if(!user){
         console.log("User not found");
-        throw new NotFoundError("404 not found");
+        throw new NotFoundError("User not found");
     }
 
     try {
         await revokeRefreshToken(authToken);
     } catch {
         console.log("Refresh token not found");
-        throw new NotFoundError("404 not found");
+        throw new NotFoundError("Not found");
     }
 
     res.status(204).send();

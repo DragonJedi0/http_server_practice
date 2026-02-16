@@ -105,7 +105,7 @@ export async function handlerUpdateUser(req: Request, res: Response) {
 
     if(!userId){
         console.log("Invalid access token");
-        throw new UnauthorizedError("401 Not Authorized");
+        throw new UnauthorizedError("Not Authorized");
     }
 
     const hashedPassword = await hashPassword(password);
@@ -113,7 +113,7 @@ export async function handlerUpdateUser(req: Request, res: Response) {
     const updatedUser = await udpateUser(userId, email, hashedPassword);
     if(!updatedUser){
         console.log("User is not authorized to make changes");
-        throw new UnauthorizedError("401 Not Authorized");
+        throw new UnauthorizedError("Not Authorized");
     }
 
     const securedUser: UserResponse = {

@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from "vitest";
-import { checkPasswordHash, extractBearerToken, hashPassword, makeJWT, validateJWT } from "../auth.js";
+import { checkPasswordHash, extractAPIKey, extractBearerToken, hashPassword, makeJWT, validateJWT } from "../auth.js";
 import { BadRequestError, UnauthorizedError } from "../errors.js";
 import jwt from "jsonwebtoken";
 
@@ -83,7 +83,7 @@ describe("Token Functions", () => {
     const header2 = "Bearer my-other-secret-token";
     const badHeader = "invalid header";
     const badHeader2 = "Bearer";
-    const badHeader3 = "Bearer";
+    const badHeader3 = "";
     
     it("should validate a valid token", () => {
         const result = extractBearerToken(header);
@@ -107,6 +107,39 @@ describe("Token Functions", () => {
     
     it("should throw an error for missing headers", () => {
         expect(() => { extractBearerToken(badHeader3) })
+            .toThrow(BadRequestError);
+    });
+});
+
+describe("API Key Functions", () => {
+    const header = "ApiKey VALID_KEY";
+    const header2 = "ApiKey OTHER_VALID_KEY";
+    const badHeader = "invalid header";
+    const badHeader2 = "ApiKey";
+    const badHeader3 = "";
+    
+    it("should validate a valid API Key", () => {
+        const result = extractAPIKey(header);
+        expect(result).toBe("VALID_KEY");
+    });
+    
+    it("should validate a valid API Key", () => {
+        const result = extractAPIKey(header2);
+        expect(result).toBe("OTHER_VALID_KEY");
+    });
+    
+    it("should throw an error for missing headers", () => {
+        expect(() => { extractAPIKey(badHeader) })
+            .toThrow(BadRequestError);
+    });
+    
+    it("should throw an error for missing headers", () => {
+        expect(() => { extractAPIKey(badHeader2) })
+            .toThrow(BadRequestError);
+    });
+    
+    it("should throw an error for missing headers", () => {
+        expect(() => { extractAPIKey(badHeader3) })
             .toThrow(BadRequestError);
     });
 });

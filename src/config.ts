@@ -9,10 +9,12 @@ type APIConfig = {
     fileServerHits: number;
     port: number;
     platform: string;
+    polkaKey: string;
 };
 
 type JWTConfig = {
     defaultDuration: number;
+    resetDuration: number;
     secret: string;
     issuer: string;
 }
@@ -33,7 +35,8 @@ export const config: Config = {
     api: {
         fileServerHits: 0,
         port: Number(envOrThrow("PORT")),
-        platform: envOrThrow("PLATFORM")
+        platform: envOrThrow("PLATFORM"),
+        polkaKey: envOrThrow("POLKA_KEY"),
     },
     db: {
         migrationConfig: migrationConfig,
@@ -41,6 +44,7 @@ export const config: Config = {
     },
     jwt: {
         defaultDuration: 60 * 60, // 1 hour in seconds
+        resetDuration: ((3600 * 24) * 60) * 1000, // (((1 hour in seconds * 24) * 60 days) * 1000 milliseconds) // 60 Days in milliseconds
         secret: envOrThrow("SECRET"),
         issuer: "chirpy",
     }
