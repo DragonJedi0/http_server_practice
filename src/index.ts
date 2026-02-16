@@ -9,7 +9,7 @@ import { errorHandler } from "./api/errors.js";
 import { config } from "./config.js";
 import { middlewareReset } from "./api/reset.js";
 import { middlewarePrintMetrics } from "./api/metrics.js";
-import { handlerCreateUser, handlerLogIn } from "./api/users.js";
+import { handlerCreateUser, handlerLogIn, handlerUpdateUser } from "./api/users.js";
 import { handlerRefreshToken, handlerRevokeToken } from "./api/token.js";
 
 const migrationClient = postgres(config.db.url, { max: 1 });
@@ -51,6 +51,9 @@ app.get("/api/chirps/:chirpId", (req, res, next) => {
   // User handlers
 app.post("/api/users", (req, res, next) => {
     Promise.resolve(handlerCreateUser(req, res)).catch(next);
+});
+app.put("/api/users", (req, res, next) => {
+    Promise.resolve(handlerUpdateUser(req, res)).catch(next);
 });
 
 

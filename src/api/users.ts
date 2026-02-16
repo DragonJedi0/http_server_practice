@@ -1,11 +1,17 @@
-import e, { Request, Response } from "express";
-import { BadRequestError, UnauthorizedError } from "../api/errors.js";
-import { createUser, getUserByEmail } from "../lib/db/queries/users.js";
+import { Request, Response } from "express";
+import { BadRequestError, NotFoundError, UnauthorizedError } from "../api/errors.js";
+import { createUser, getUserByEmail, udpateUser } from "../lib/db/queries/users.js";
 import { respondWithJSON } from "./json.js";
-import { checkPasswordHash, hashPassword, makeJWT, makeRefreshToken } from "./auth.js";
+import { checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT } from "./auth.js";
 import { NewUser } from "../lib/db/schema.js";
 import { config } from "../config.js";
-import { createRefreshToken } from "../lib/db/queries/refreshTokens.js";
+import { createRefreshToken, getUserFromRefreshToken } from "../lib/db/queries/refreshTokens.js";
+
+// Create a request type to get user credentials
+type UserRequest = {
+    email: string;
+    password: string;
+}
 
 // Create a response type to prevent hashedPassword from being transmitted
 type UserResponse = Omit<NewUser, "hashedPassword">;
@@ -15,13 +21,8 @@ type LoginResponse = UserResponse & {
 };
 
 export async function handlerCreateUser(req: Request, res: Response) {
-    type parameters = {
-        email: string;
-        password: string;
-    };
-
     // req.body is automatically parsed via app.use(express.json())
-    const params: parameters = req.body;
+    const params: UserRequest = req.body;
 
     if(!params.email || !params.password){
         throw new BadRequestError("Missing required fields");
@@ -47,12 +48,11 @@ export async function handlerCreateUser(req: Request, res: Response) {
 }
 
 export async function handlerLogIn(req: Request, res: Response) {
-    type parameters = {
-        email: string;
-        password: string;
-    };
     // req.body is automatically parsed via app.use(express.json())
-    const params: parameters = req.body;
+    const params: UserRequest = req.body;
+    if(!params.email || !params.password){
+        throw new BadRequestError("Missing required fields");
+    }
 
     // find user by email
     const user = await getUserByEmail(params.email);
@@ -85,5 +85,40 @@ export async function handlerLogIn(req: Request, res: Response) {
         refreshToken: refreshToken.token,
     }
     console.log(`User with email ${securedUser.email} successfully logged in`);
+    respondWithJSON(res, 200, securedUser);
+}
+
+export async function handlerUpdateUser(req: Request, res: Response) {
+    const params: UserRequest = req.body;
+    if(!params.email || !params.password){
+        throw new BadRequestError("Missing required fields");
+    }
+
+    const email = params.email;
+    const password = params.password;
+
+    const authToken = getBearerToken(req);
+
+    const userId = validateJWT(authToken, config.jwt.secret);
+
+    if(!userId){
+        console.log("Invalid access token");
+        throw new UnauthorizedError("401 Not Authorized");
+    }
+
+    const hashedPassword = await hashPassword(password);
+
+    const updatedUser = await udpateUser(userId, email, hashedPassword);
+    if(!updatedUser){
+        console.log("User is not authorized to make changes");
+        throw new UnauthorizedError("401 Not Authorized");
+    }
+
+    const securedUser: UserResponse = {
+        id: updatedUser.id,
+        createdAt: updatedUser.createdAt,
+        updatedAt: updatedUser.updatedAt,
+        email: updatedUser.email
+    }
     respondWithJSON(res, 200, securedUser);
 }

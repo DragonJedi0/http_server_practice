@@ -53,7 +53,8 @@ export function validateJWT(tokenString: string, secret: string): string{
 export function getBearerToken(req: Request): string{
     const authHeader = req.get("Authorization");
     if(!authHeader){
-        throw new BadRequestError("Malformed authorization header");
+        console.log("Authorization header not found");
+        throw new UnauthorizedError("401 Not Authorized");
     }
     return extractBearerToken(authHeader);
 }
@@ -61,6 +62,7 @@ export function getBearerToken(req: Request): string{
 export function extractBearerToken(header: string): string{
     const splitAuth = header.split(" ");
     if(splitAuth.length < 2 || splitAuth.length > 2 || splitAuth[0] !== "Bearer"){
+        console.log("Authorization header malformed");
         throw new BadRequestError("Malformed authorization header");
     }
     return splitAuth[1];
