@@ -34,3 +34,12 @@ export async function udpateUser(userId: string, email: string, password: string
         .returning();
     return result;
 }
+
+export async function upgradeUserToRed(userId: string) {
+    await db
+        .update(users)
+        .set({
+            isChirpyRed: true,
+        })
+        .where(eq(users.id, userId));
+}

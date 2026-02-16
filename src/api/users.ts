@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { BadRequestError, NotFoundError, UnauthorizedError } from "../api/errors.js";
+import { BadRequestError, UnauthorizedError } from "../api/errors.js";
 import { createUser, getUserByEmail, udpateUser } from "../lib/db/queries/users.js";
 import { respondWithJSON } from "./json.js";
 import { checkPasswordHash, getBearerToken, hashPassword, makeJWT, makeRefreshToken, validateJWT } from "./auth.js";
 import { NewUser } from "../lib/db/schema.js";
 import { config } from "../config.js";
-import { createRefreshToken, getUserFromRefreshToken } from "../lib/db/queries/refreshTokens.js";
+import { createRefreshToken } from "../lib/db/queries/refreshTokens.js";
 
 // Create a request type to get user credentials
 type UserRequest = {
@@ -42,7 +42,8 @@ export async function handlerCreateUser(req: Request, res: Response) {
         id: user.id,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        email: user.email
+        email: user.email,
+        isChirpyRed: user.isChirpyRed,
     }
     respondWithJSON(res, 201, securedUser);
 }
@@ -81,6 +82,7 @@ export async function handlerLogIn(req: Request, res: Response) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         email: user.email,
+        isChirpyRed: user.isChirpyRed,
         token: token,
         refreshToken: refreshToken.token,
     }
@@ -118,7 +120,8 @@ export async function handlerUpdateUser(req: Request, res: Response) {
         id: updatedUser.id,
         createdAt: updatedUser.createdAt,
         updatedAt: updatedUser.updatedAt,
-        email: updatedUser.email
+        email: updatedUser.email,
+        isChirpyRed: updatedUser.isChirpyRed,
     }
     respondWithJSON(res, 200, securedUser);
 }
