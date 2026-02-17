@@ -4,7 +4,6 @@ import { createChirp, deleteChripByID, getAllChirps, getChirpById } from "../lib
 import { respondWithJSON } from "./json.js";
 import { getBearerToken, validateJWT } from "./auth.js";
 import { config } from "../config.js";
-import { getUserFromRefreshToken } from "../lib/db/queries/refreshTokens.js";
 
 export async function handlerPostChirp(req: Request, res: Response) {
     type parameters = {
@@ -58,7 +57,13 @@ function getCleanedBody(body: string, restrictedWords: string[]){
 }
 
 export async function handlerGetAllChirps(req: Request, res: Response) {
-    const chirps = await getAllChirps();
+    let authorId = "";
+    let authorIdQuery = req.query.authorId;
+    if (typeof authorIdQuery === "string"){
+        authorId = authorIdQuery;
+    }
+
+    const chirps = await getAllChirps(authorId);
     respondWithJSON(res, 200, chirps);
 }
 
